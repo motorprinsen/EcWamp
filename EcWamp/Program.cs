@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using ExoConfig;
 using ExoConfig.Query;
 using ExoConfig.Support;
+using SystemEx;
+using WampSharp.V2;
+using WampSharp.V2.Realm;
 
 namespace EcWamp
 {
@@ -13,17 +16,30 @@ namespace EcWamp
     {
         static void Main(string[] args)
         {
-            EXO.DomainCx domain=new EXO.DomainCx();
-            domain.Domain = new EXO.DomainCx.tAreaDomain(@"C:\EXO Projects\Regin\Styrsystem1");
-            string defaultController=ExoProjectSupport.GetDefaultController(@"C:\EXO Projects\Regin\Styrsystem1");
-            EcQuery ecQuery = new EcQuery("esav");
-            Dictionary<string, string> dict = new Dictionary<string, string>();
-            dict.Add("Controller", defaultController);
-            dict.Add("UnnamedArgument_2", "Detta är arg 2!");
-            EcDataSet dataSet = ecQuery.GetData(@"C:\EXO Projects\Regin\Styrsystem1\EXOFlex_1.Esav", dict, domain);
+            OpenWampHost();
+           
             
             Console.ReadKey();
             
+        }
+        public static void OpenWampHost()
+        {
+            const string location = "ws://127.0.0.1:8080/";
+
+            using (IWampHost host = new DefaultWampHost(location))
+            {
+
+                IWampHostedRealm realm1 = host.RealmContainer.GetRealmByName("realm");
+
+                Task<IAsyncDisposable> registrationTask = realm1.Services.RegisterCallee(new BlopService());
+                // await registrationTask;
+                registrationTask.Wait();
+                host.Open();
+
+                Console.WriteLine("Wamp is open on" + location);
+                Console.ReadKey();
+
+            }
         }
     }
 }
