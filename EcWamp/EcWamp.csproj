@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4CFC8EF5-2F7D-46A6-A08A-E131137619D0}</ProjectGuid>
+    <ProjectGuid>{477AEB17-9D8C-4094-A2B3-1B95BA812582}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>EcWamp</RootNamespace>
     <AssemblyName>EcWamp</AssemblyName>
