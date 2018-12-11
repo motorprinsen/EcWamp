@@ -68,8 +68,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiagnosticDictionary.cs" />
+    <Compile Include="EXOGLibSupport.cs" />
+    <Compile Include="FileOp.cs" />
+    <Compile Include="Numbers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WFRuntimeArguments.cs" />
+    <Compile Include="WindowTypeConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

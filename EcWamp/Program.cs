@@ -1,42 +1,44 @@
-﻿using System;
+﻿using EXO;
+using ExoConfig.Query;
+using ExoConfig.Support;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ExoConfig;
-using ExoConfig.Query;
-using ExoConfig.Support;
-using EXO;
 
 namespace EcWamp
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            DomainCx domain =new DomainCx();
+            DomainCx domain = new DomainCx();
             domain.Domain = new DomainCx.tAreaDomain(@"C:\EXO Projects\Regin\Styrsystem1");
-            string defaultController=ExoProjectSupport.GetDefaultController(@"C:\EXO Projects\Regin\Styrsystem1");
-            EcQuery ecQuery = new EcQuery("esav");
-            Dictionary<string, string> dict = new Dictionary<string, string>();
-            dict.Add("Controller", defaultController);
-            dict.Add("UnnamedArgument_2", "Detta är arg 2!");
-            EcDataSet dataSet = ecQuery.GetData(@"C:\EXO Projects\Regin\Styrsystem1\EXOFlex_1.Esav", dict, domain);
-            
+            string defaultController = ExoProjectSupport.GetDefaultController(@"C:\EXO Projects\Regin\Styrsystem1");
+            var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
+
+            TT(@"C:\EXO Projects\Regin\Styrsystem1\EXOFlex_1.Esav", domain, defaultController, viewArgs);
+
+            //EcQuery ecQuery = new EcQuery("esav");
+            //Dictionary<string, string> dict = new Dictionary<string, string>();
+            //dict.Add("Controller", defaultController);
+            //dict.Add("UnnamedArgument_2", "Detta är arg 2!");
+            //EcDataSet dataSet = ecQuery.GetData(@"C:\EXO Projects\Regin\Styrsystem1\EXOFlex_1.Esav", dict, domain);
+
             Console.ReadKey();
-            
         }
 
-        public static void TT(string filepath, DomainCx domain, string defaultController)
+        public static void TT(string filepath, DomainCx domain, string defaultController, object[] args)
         {
+            WFRuntimeArguments parser = new WFRuntimeArguments(args);
             //string filepath = "";
             var esavFormat = new EcQuery("Esav");
-            //if (!EXO.EXOlib.CheckIdentifier(parser.ViewName))
-            //{
-            //    throw new BadIdentifierException(parser.ViewName, null);
-            //}
-
+            if (!EXO.EXOlib.CheckIdentifier(parser.ViewName))
+            {
+                //throw new BadIdentifierException(parser.ViewName, null);
+                Console.WriteLine("BadIdentifierException");
+                return;
+            }
 
             //filepath = FileOp.TranslatePath(parser.Path, parent);
             FileInfo f = new FileInfo(filepath);
@@ -80,28 +82,15 @@ namespace EcWamp
             }
             else
             {
-                throw new FileInBadFormatException(filepath, argumentDataSet.Result, null);
+                Console.WriteLine("FileInBadFormatException");
             }
 
-            // var dataSet = EsavFormat.GetData(filepath, runtimeArgs, FileOp.GetDomain(parent));
-            //EcQuery.CollectTimerEvents = true;
-            var dataSet = esavFormat.GetData(filepath, runtimeArgs, FileOp.GetDomain(parent));
-            //events.AddRange(EcQuery.TimerEntries.Select((entry => new ExoWebSession.WatchEvent { EventText = entry.EventText, ElapsedMs = entry.ElapsedMs })));
-            //EcQuery.TimerEntries = new List<EcQuery.TimerEntry>();
-            //EcQuery.CollectTimerEvents = false;
-
-            //arguments is 
-
-            //events.Add(new ExoWebSession.WatchEvent
-            //{
-            //    EventText = "Read file content with arguments"+filepath,
-            //    ElapsedMs = sw.ElapsedMilliseconds
-            //}); sw.Restart();
-
-            //StaticTimer.Stop(701);
+            var dataSet = esavFormat.GetData(filepath, runtimeArgs, domain);
 
             if (dataSet.Result != DataSetResults.Success)
-                return null;
+            {
+                Console.WriteLine("dataSet.Result != DataSetResults.Success");
+            }
         }
     }
 }
