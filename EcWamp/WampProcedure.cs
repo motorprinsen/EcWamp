@@ -15,12 +15,12 @@ namespace EcWamp
     public interface IBlopService
     {
         [WampProcedure("com.arguments.GetView")]
-        object GetView(string area = "", string esavFile = "", object[] args = null);
+        JsonDataSet GetView(string area = "", string esavFile = "", object[] args = null);
     }
 
     public class BlopService : IBlopService
     {
-        public object GetView(string area = "", string esavFile = "", object[] args=null)
+        public JsonDataSet GetView(string area = "", string esavFile = "", object[] args=null)
         {
             EXO.DomainCx domain = new EXO.DomainCx();
             domain.Domain = new EXO.DomainCx.tAreaDomain(@"C:\EXO Projects\Regin\Styrsystem1");
@@ -33,8 +33,10 @@ namespace EcWamp
             EcDataSet dataSet = ecQuery.GetData(filePath, dict, domain);
 
             getEsav(defaultController, new WFRuntimeArguments(args), domain, filePath);
+            
+           //Convert exdataset to jsondataset
             //serialize dataSet
-            return "";
+            return null;
 
         }
         public static void getEsav(String defaultController, WFRuntimeArguments parser, EXO.DomainCx domain, String filepath)
