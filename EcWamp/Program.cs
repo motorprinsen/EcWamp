@@ -7,30 +7,37 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using SystemEx;
+using WampSharp.V2;
+using WampSharp.V2.Realm;
+using WampSharp.V2.Rpc;
 
 namespace EcWamp
 {
-    internal class Program
+    public interface IViewService
     {
-        private static void Main(string[] args)
+        [WampProcedure("com.arguments.getView")]
+        JsonDataSet GetView(string area, string virtPath, object[] args);
+    }
+
+    public class ViewService : IViewService
+    {
+        JsonDataSet IViewService.GetView(string area, string virtPath, object[] args)
         {
             DomainCx domain = new DomainCx();
-            domain.Domain = new DomainCx.tAreaDomain(@"C:\EXO Projects\Regin\Styrsystem1");
-            string defaultController = ExoProjectSupport.GetDefaultController(@"C:\EXO Projects\Regin\Styrsystem1");
+            // We already the the proj path in the EXOscada Function
+            var projPath = @"C:\EXO Projects\Regin\";
+            var areaPath = $"{projPath}{area}";
+            domain.Domain = new DomainCx.tAreaDomain(areaPath);
+            string defaultController = ExoProjectSupport.GetDefaultController(areaPath);
             var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
 
-            TT(@"C:\EXO Projects\Regin\Styrsystem1\EXOFlex_1.Esav", domain, defaultController, viewArgs);
-
-            //EcQuery ecQuery = new EcQuery("esav");
-            //Dictionary<string, string> dict = new Dictionary<string, string>();
-            //dict.Add("Controller", defaultController);
-            //dict.Add("UnnamedArgument_2", "Detta är arg 2!");
-            //EcDataSet dataSet = ecQuery.GetData(@"C:\EXO Projects\Regin\Styrsystem1\EXOFlex_1.Esav", dict, domain);
-
-            Console.ReadKey();
+            return TT(@"C:\EXO Projects\Regin\Styrsystem1\EXOFlex_1.Esav", domain, defaultController, viewArgs);
         }
 
-        public static void TT(string filepath, DomainCx domain, string defaultController, object[] args)
+        private JsonDataSet TT(string filepath, DomainCx domain, string defaultController, object[] args)
         {
             WFRuntimeArguments parser = new WFRuntimeArguments(args);
             //string filepath = "";
@@ -39,7 +46,7 @@ namespace EcWamp
             {
                 //throw new BadIdentifierException(parser.ViewName, null);
                 Console.WriteLine("BadIdentifierException");
-                return;
+                return null;
             }
 
             //filepath = FileOp.TranslatePath(parser.Path, parent);
@@ -99,22 +106,19 @@ namespace EcWamp
             jsonDataSet.Nodes.First().Children.RemoveAt(0);
 
             //Blob
-            var json = JsonConvert.SerializeObject(jsonDataSet);
+            return jsonDataSet;
 
             //param till wampservern callee procedure
             //JsonDataSet dataSet = GetView(String virtPath = "Area:\....esav", string area = "styrsystem1");
 
             ///wampa över jsonDataSet
-            ///Deserialize 
+            ///Deserialize
             ///accescontrol filter
             ///Change all bindings  (*....)
             ///blob
-
-
-
         }
 
-        public static JsonDataSet ConvertEcDataSetToJsonDataSet(EcDataSet source)
+        private JsonDataSet ConvertEcDataSetToJsonDataSet(EcDataSet source)
         {
             var result = new JsonDataSet
             {
@@ -131,7 +135,7 @@ namespace EcWamp
             return result;
         }
 
-        public static JsonDataNode ConvertEcDataNodeToJsonDataNode(EcDataNode source)
+        private JsonDataNode ConvertEcDataNodeToJsonDataNode(EcDataNode source)
         {
             var result = new JsonDataNode
             {
@@ -151,8 +155,7 @@ namespace EcWamp
                     Value = property.Value
                 };
 
-          
-                result.Attributes.Add(jsonProperty.Name , jsonProperty.Value);
+                result.Attributes.Add(jsonProperty.Name, jsonProperty.Value);
             }
 
             foreach (var child in source.Children)
@@ -161,6 +164,34 @@ namespace EcWamp
             }
 
             return result;
+        }
+    }
+
+    public class WampServer
+    {
+        private DefaultWampHost wampHost;
+        private IWampHostedRealm realm;
+        private readonly ViewService viewService = new ViewService();
+
+        public void Start()
+        {
+            var location = "ws://127.0.0.1:8080/";
+            wampHost = new DefaultWampHost(location);
+            realm = wampHost.RealmContainer.GetRealmByName("views");
+            Task<IAsyncDisposable> registrationTask = realm.Services.RegisterCallee(viewService);
+            registrationTask.Wait();
+            wampHost.Open();
+            Console.WriteLine($"Wamp server started at {location}");
+        }
+    }
+
+    public class Program
+    {
+        private static void Main(string[] args)
+        {
+            new WampServer().Start();
+            new AutoResetEvent(false).WaitOne();
+            Console.ReadKey();
         }
     }
 }
