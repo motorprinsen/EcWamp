@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WampClient.Query;
 using WampSharp.V2;
 using WampSharp.V2.Rpc;
 
@@ -13,7 +14,7 @@ namespace WampClient
     public interface IBlopService
     {
         [WampProcedure("com.arguments.GetView")]
-        EcDataSet GetView(string area = "", string esavFile = "");
+        JsonDataSet GetView(string area = "", string esavFile = "");
     }
     class Program
     {

@@ -129,9 +129,9 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Query\JsonDataNode.cs" />
-    <Compile Include="Query\JsonDataProperty.cs" />
-    <Compile Include="Query\JsonDataSet.cs" />
+    <Compile Include="JsonData\JsonDataNode.cs" />
+    <Compile Include="JsonData\JsonDataProperty.cs" />
+    <Compile Include="JsonData\JsonDataSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
