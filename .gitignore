@@ -1,0 +1,13 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/EcWamp/bin/Debug
+/JsonData/bin/Debug/netstandard2.0
+/JsonData/obj
+/packages
+/WampClient/obj/Debug
+/EcWamp/bin/x86/Debug
+/EcWamp/obj/x86/Debug
+/EcWamp/obj/x86/Release
+/WampClient/bin/Debug

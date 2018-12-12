@@ -1,6 +1,8 @@
 ﻿using EXO;
 using ExoConfig.Query;
 using ExoConfig.Support;
+using JsonData;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -91,6 +93,74 @@ namespace EcWamp
             {
                 Console.WriteLine("dataSet.Result != DataSetResults.Success");
             }
+            //convert ec to json data
+            var jsonDataSet = ConvertEcDataSetToJsonDataSet(dataSet);
+            //delete arguments
+            jsonDataSet.Nodes.First().Children.RemoveAt(0);
+
+            //Blob
+            var json = JsonConvert.SerializeObject(jsonDataSet);
+
+            //param till wampservern callee procedure
+            //JsonDataSet dataSet = GetView(String virtPath = "Area:\....esav", string area = "styrsystem1");
+
+            ///wampa över jsonDataSet
+            ///Deserialize 
+            ///accescontrol filter
+            ///Change all bindings  (*....)
+            ///blob
+
+
+
+        }
+
+        public static JsonDataSet ConvertEcDataSetToJsonDataSet(EcDataSet source)
+        {
+            var result = new JsonDataSet
+            {
+                Nodes = new List<JsonDataNode>(),
+                Format = source.Format,
+                Result = (JsonDataSetResults)Enum.Parse(typeof(JsonDataSetResults), source.Result.ToString())
+            };
+
+            foreach (var node in source.Nodes)
+            {
+                result.Nodes.Add(ConvertEcDataNodeToJsonDataNode(node));
+            }
+
+            return result;
+        }
+
+        public static JsonDataNode ConvertEcDataNodeToJsonDataNode(EcDataNode source)
+        {
+            var result = new JsonDataNode
+            {
+                Children = new List<JsonDataNode>(),
+                Attributes = new Dictionary<string, object>(),
+                Type = source.Type
+            };
+
+            foreach (var property in source.Properties)
+            {
+                var jsonProperty = new JsonDataProperty
+                {
+                    Parameters = new List<JsonDataPropertyParameter>(),
+                    Name = property.Name,
+                    IsDefault = property.IsDefault,
+                    Type = property.Type,
+                    Value = property.Value
+                };
+
+          
+                result.Attributes.Add(jsonProperty.Name , jsonProperty.Value);
+            }
+
+            foreach (var child in source.Children)
+            {
+                result.Children.Add(ConvertEcDataNodeToJsonDataNode(child));
+            }
+
+            return result;
         }
     }
 }
