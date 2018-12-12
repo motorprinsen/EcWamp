@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using SystemEx;
@@ -24,14 +25,30 @@ namespace EcWamp
 
     public class ViewService : IViewService
     {
-        private static DomainCx domain = new DomainCx();
+        private static DomainCx domain;
 
-        JsonDataSet IViewService.GetView(string area, string viewFile, object[] args)
+        static ViewService()
         {
-            // We already the the proj path in the EXOscada Function
+            Console.WriteLine($"About to create DomainCX on thread {Thread.CurrentThread.ManagedThreadId}");
+            domain = new DomainCx();
+            Console.WriteLine("Created DomainCX");
+        }
+
+        [HandleProcessCorruptedStateExceptions]
+        public JsonDataSet GetView(string area, string viewFile, object[] args)
+        {
+            Console.WriteLine($"Getting view on thread {Thread.CurrentThread.ManagedThreadId}");
+            // We already have the the proj path in the EXOscada Function
             var projPath = @"C:\EXO Projects\Regin\";
             var fullAreaPath = $"{projPath}{area}";
-            domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
+            try
+            {
+                domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
+            }
+            catch (System.AccessViolationException exception)
+            {
+                Console.WriteLine("Unable to create domain.");
+            }
             string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
             return ParseEsavAndGenerateJsonDataSet(viewFile, domain, defaultController, args);
@@ -189,6 +206,10 @@ namespace EcWamp
     {
         private static void Main(string[] args)
         {
+            var viewService = new ViewService();
+            var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
+            var view = viewService.GetView("Styrsystem1", @"Area:\EXOFlex_1.Esav", viewArgs);
+
             new WampServer().Start();
             new AutoResetEvent(false).WaitOne();
             Console.ReadKey();
