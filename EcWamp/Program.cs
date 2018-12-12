@@ -19,25 +19,25 @@ namespace EcWamp
     public interface IViewService
     {
         [WampProcedure("com.arguments.getView")]
-        JsonDataSet GetView(string area, string virtPath, object[] args);
+        JsonDataSet GetView(string area, string viewFile, object[] args);
     }
 
     public class ViewService : IViewService
     {
-        JsonDataSet IViewService.GetView(string area, string virtPath, object[] args)
+        private static DomainCx domain = new DomainCx();
+
+        JsonDataSet IViewService.GetView(string area, string viewFile, object[] args)
         {
-            DomainCx domain = new DomainCx();
             // We already the the proj path in the EXOscada Function
             var projPath = @"C:\EXO Projects\Regin\";
-            var areaPath = $"{projPath}{area}";
-            domain.Domain = new DomainCx.tAreaDomain(areaPath);
-            string defaultController = ExoProjectSupport.GetDefaultController(areaPath);
-            var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
+            var fullAreaPath = $"{projPath}{area}";
+            domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
+            string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
-            return TT(@"C:\EXO Projects\Regin\Styrsystem1\EXOFlex_1.Esav", domain, defaultController, viewArgs);
+            return ParseEsavAndGenerateJsonDataSet(viewFile, domain, defaultController, args);
         }
 
-        private JsonDataSet TT(string filepath, DomainCx domain, string defaultController, object[] args)
+        private JsonDataSet ParseEsavAndGenerateJsonDataSet(string viewFile, DomainCx domain, string defaultController, object[] args)
         {
             WFRuntimeArguments parser = new WFRuntimeArguments(args);
             //string filepath = "";
@@ -49,7 +49,7 @@ namespace EcWamp
                 return null;
             }
 
-            //filepath = FileOp.TranslatePath(parser.Path, parent);
+            var filepath = domain.TransVirtPath(viewFile);
             FileInfo f = new FileInfo(filepath);
             if (!f.Exists)
             {
