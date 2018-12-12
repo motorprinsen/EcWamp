@@ -11,3 +11,6 @@
 /EcWamp/obj/x86/Debug
 /EcWamp/obj/x86/Release
 /WampClient/bin/Debug
+/JsonData/bin/x86/Debug/netstandard2.0
+/WampClient/bin/x86/Debug
+/WampClient/obj/x86/Debug
