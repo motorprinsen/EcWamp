@@ -16,9 +16,11 @@ namespace EcWamp
     {
         static void Main(string[] args)
         {
-            OpenWampHost();
-           
-            
+           // OpenWampHost();
+            BlopService blob = new BlopService();
+            blob.GetView();
+
+
             Console.ReadKey();
             
         }
