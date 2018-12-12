@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/EcWamp/bin
+/WampClient/obj/Debug
+/EcWamp/obj/x86
+/.vs/EcWamp/v15/Server/sqlite3

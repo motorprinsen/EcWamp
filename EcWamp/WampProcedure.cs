@@ -1,5 +1,6 @@
 ﻿using ExoConfig.Query;
 using ExoConfig.Support;
+using JsonData;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,6 +40,64 @@ namespace EcWamp
             return null;
 
         }
+
+        public JsonDataSet ConvertEcDataSetToJsonDataSet(EcDataSet source)
+        {
+            var result = new JsonDataSet
+            {
+                Nodes = new List<JsonDataNode>(),
+                Format = source.Format,
+                Result = (JsonDataSetResults)Enum.Parse(typeof(JsonDataSetResults), source.Result.ToString())
+            };
+
+            foreach (var node in source.Nodes)
+            {
+                result.Nodes.Add(ConvertEcDataNodeToJsonDataNode(node));
+            }
+
+            return result;
+        }
+
+        public JsonDataNode ConvertEcDataNodeToJsonDataNode(EcDataNode source)
+        {
+            var result = new JsonDataNode
+            {
+                Children = new List<JsonDataNode>(),
+                Properties = new List<JsonDataProperty>(),
+                Type = source.Type
+            };
+
+            foreach (var property in source.Properties)
+            {
+                var jsonProperty = new JsonDataProperty
+                {
+                    Name = property.Name,
+                    IsDefault = property.IsDefault,
+                    Type = property.Type,
+                    Value = property.Value
+                };
+
+                foreach (var parameter in property.Parameters)
+                {
+                    var jsonParameter = new JsonDataPropertyParameter
+                    {
+                        Name = parameter.Name,
+                        Value = parameter.Value
+                    };
+
+                    jsonProperty.Parameters.Add(jsonParameter);
+                }
+
+            }
+
+            foreach (var child in source.Children)
+            {
+                result.Children.Add(ConvertEcDataNodeToJsonDataNode(child));
+            }
+
+            return result;
+        }
+
         public static void getEsav(String defaultController, WFRuntimeArguments parser, EXO.DomainCx domain, String filepath)
         {
             try

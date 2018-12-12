@@ -150,6 +150,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiagnoticDictonary.cs" />
+    <Compile Include="JsonData\JsonDataNode.cs" />
+    <Compile Include="JsonData\JsonDataProperty.cs" />
+    <Compile Include="JsonData\JsonDataSet.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WampProcedure.cs" />

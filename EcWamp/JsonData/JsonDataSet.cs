@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace WampClient.Query
+namespace JsonData
 {
     public enum JsonDataSetResults
     {
