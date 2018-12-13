@@ -11,18 +11,28 @@ namespace EcWamp
 {
     public static class FileOp
     {
-        public static string getPath(string Domain, string AreaName, string RelativePath)
+        public static DomainCx CreateDomain(string domain, string areaName)
+        {
+            lock (EXOGLibSupport.busy)
+            {
+         
+                var myArea = new DomainCx.tAreaDomain(Path.Combine(domain, areaName));
+
+                var tempdomain = new DomainCx();
+
+                tempdomain.Domain = myArea;
+
+                return tempdomain;
+            }
+        }
+        public static string GetPath(this DomainCx domain, string RelativePath)
         {
             lock (EXOGLibSupport.busy)
             {
                 uint garbage = 0;
-                var MyArea = new DomainCx.tAreaDomain(Domain + "\\" + AreaName);
+               
 
-                var tempdomain = new DomainCx();
-
-                tempdomain.Domain = MyArea;
-
-                return tempdomain.TransVirtPath(RelativePath, 0, ref garbage);
+                return domain.TransVirtPath(RelativePath, 0, ref garbage);
             }
         }
         /// <summary>

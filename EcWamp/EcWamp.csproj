@@ -182,7 +182,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\SOURCE\EXO\EXO\ExoConfig\ExoConfig\ExoConfig.csproj">
+    <ProjectReference Include="..\..\..\..\..\..\source\EXO\EXO\ExoConfig\ExoConfig\ExoConfig.csproj">
       <Project>{cf22d662-cbfb-499d-b193-4e9d70735124}</Project>
       <Name>ExoConfig</Name>
     </ProjectReference>
