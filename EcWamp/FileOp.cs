@@ -35,6 +35,31 @@ namespace EcWamp
             return EXOGLibSupport.TranslateFilePath(path);
         }
 
+        //public static string TranslatePath(string inPath, string context)
+        //{
+        //    uint garbage = 0;
+
+        //    lock (EXOGLibSupport.busy)
+        //    {
+        //        var tempdomain = new DomainCx();
+
+        //        if (parentArea != null && !string.IsNullOrEmpty(parentArea.AreaPath))
+        //        {
+        //            tempdomain.Domain = new DomainCx.tAreaDomain(parentArea.AreaPath);
+        //        }
+        //        else if (parentArea != null && !string.IsNullOrEmpty(parentArea.ProjectPath))
+        //        {
+        //            tempdomain.Domain = new DomainCx.tProjectDomain(parentArea.ProjectPath);
+        //        }
+        //        else
+        //        {
+        //            tempdomain = new DefaultCx();
+        //        }
+
+        //        return ch.TranslateToString();
+        //    }
+        //}
+
         /// <summary>
         /// Translates a relative path according to the contextNodes location
         /// </summary>

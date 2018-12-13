@@ -25,36 +25,37 @@ namespace EcWamp
 
     public class ViewService : IViewService
     {
-        private static DomainCx domain;
+        //private static DomainCx domain;
 
-        static ViewService()
-        {
-            Console.WriteLine($"About to create DomainCX on thread {Thread.CurrentThread.ManagedThreadId}");
-            domain = new DomainCx();
-            Console.WriteLine("Created DomainCX");
-        }
+        //static ViewService()
+        //{
+        //    Console.WriteLine($"About to create DomainCX on thread {Thread.CurrentThread.ManagedThreadId}");
+        //    domain = new DomainCx();
+        //    Console.WriteLine("Created DomainCX");
+        //}
 
         [HandleProcessCorruptedStateExceptions]
         public JsonDataSet GetView(string area, string viewFile, object[] args)
         {
             Console.WriteLine($"Getting view on thread {Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"Are we 64bit right now? {Environment.Is64BitProcess}");
             // We already have the the proj path in the EXOscada Function
             var projPath = @"C:\EXO Projects\Regin\";
             var fullAreaPath = $"{projPath}{area}";
-            try
-            {
-                domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
-            }
-            catch (System.AccessViolationException exception)
-            {
-                Console.WriteLine("Unable to create domain.");
-            }
+            //try
+            //{
+            //    domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
+            //}
+            //catch (System.AccessViolationException exception)
+            //{
+            //    Console.WriteLine("Unable to create domain.");
+            //}
             string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
-            return ParseEsavAndGenerateJsonDataSet(viewFile, domain, defaultController, args);
+            return ParseEsavAndGenerateJsonDataSet(viewFile, projPath, area, defaultController, args);
         }
 
-        private JsonDataSet ParseEsavAndGenerateJsonDataSet(string viewFile, DomainCx domain, string defaultController, object[] args)
+        private JsonDataSet ParseEsavAndGenerateJsonDataSet(string viewFile, string projPath, string area, string defaultController, object[] args)
         {
             WFRuntimeArguments parser = new WFRuntimeArguments(args);
             //string filepath = "";
@@ -66,14 +67,15 @@ namespace EcWamp
                 return null;
             }
 
-            var filepath = domain.TransVirtPath(viewFile);
+            //var filepath = domain.TransVirtPath(viewFile);
+            var filepath = FileOp.getPath(projPath, area, viewFile);
             FileInfo f = new FileInfo(filepath);
             if (!f.Exists)
             {
                 throw new FileNotFoundException("The call has an invalid File parameter. The file does not exist. (" + filepath + ")");
             }
 
-            var argumentDataSet = esavFormat.GetData(filepath, new DiagnosticDictionary<string, string>(), domain);
+            var argumentDataSet = esavFormat.GetData(filepath, new DiagnosticDictionary<string, string>()/*, domain*/);
 
             Dictionary<string, string> runtimeArgs = new Dictionary<string, string>();
             string controllerMacro = defaultController;
@@ -111,7 +113,7 @@ namespace EcWamp
                 Console.WriteLine("FileInBadFormatException");
             }
 
-            var dataSet = esavFormat.GetData(filepath, runtimeArgs, domain);
+            var dataSet = esavFormat.GetData(filepath, runtimeArgs/*, domain*/);
 
             if (dataSet.Result != DataSetResults.Success)
             {
@@ -206,9 +208,9 @@ namespace EcWamp
     {
         private static void Main(string[] args)
         {
-            var viewService = new ViewService();
-            var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
-            var view = viewService.GetView("Styrsystem1", @"Area:\EXOFlex_1.Esav", viewArgs);
+            //var viewService = new ViewService();
+            //var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
+            //var view = viewService.GetView("Styrsystem1", @"Area:\EXOFlex_1.Esav", viewArgs);
 
             new WampServer().Start();
             new AutoResetEvent(false).WaitOne();
