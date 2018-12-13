@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using SystemEx;
@@ -25,41 +24,13 @@ namespace EcWamp
 
     public class ViewService : IViewService
     {
-       //private static DomainCx domain;
-
-       // static ViewService()
-       // {
-       //     Console.WriteLine($"About to create DomainCX on thread {Thread.CurrentThread.ManagedThreadId}");
-       //     domain = new DomainCx();
-       //     Console.WriteLine("Created DomainCX");
-       // }
-
-        [HandleProcessCorruptedStateExceptions]
         public JsonDataSet GetView(string area, string viewFile, object[] args)
         {
             Console.WriteLine($"Getting view on thread {Thread.CurrentThread.ManagedThreadId}");
             Console.WriteLine($"Are we 64bit right now? {Environment.Is64BitProcess}");
             // We already have the the proj path in the EXOscada Function
             var projPath = @"C:\EXO Projects\Regin";
-            var fullAreaPath = $"{projPath}{area}";
-            //try
-            //{
-            //    lock (EXOGLibSupport.busy)
-            //    {
-            //        //EXO.EXOlib.SyncThread();
-            //        //DomainCx domain = new DomainCx();
-            //      // domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
-            //        var MyArea = new DomainCx.tAreaDomain(fullAreaPath);
-
-            //        var domain = new DomainCx();
-
-            //        domain.Domain = MyArea;
-            //    }
-            //}
-            //catch (System.AccessViolationException exception)
-            //{
-            //    Console.WriteLine("Unable to create domain.");
-            //}
+            var fullAreaPath = Path.Combine(projPath,area);
             string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
             return ParseEsavAndGenerateJsonDataSet(viewFile, projPath, area, defaultController, args);
@@ -68,7 +39,6 @@ namespace EcWamp
         private JsonDataSet ParseEsavAndGenerateJsonDataSet(string viewFile, string projPath, string area, string defaultController, object[] args)
         {
             WFRuntimeArguments parser = new WFRuntimeArguments(args);
-            //string filepath = "";
             var esavFormat = new EcQuery("Esav");
             if (!EXO.EXOlib.CheckIdentifier(parser.ViewName))
             {
@@ -77,12 +47,9 @@ namespace EcWamp
                 return null;
             }
 
-            //var filepath = domain.TransVirtPath(viewFile);
             DomainCx domain = FileOp.CreateDomain(projPath, area);
 
-            //var filepath = FileOp.getPath(projPath, area, viewFile);
-
-           var filepath = domain.GetPath(viewFile);
+            var filepath = domain.GetPath(viewFile);
             FileInfo f = new FileInfo(filepath);
             if (!f.Exists)
             {
@@ -135,18 +102,20 @@ namespace EcWamp
             }
             //convert ec to json data
             var jsonDataSet = ConvertEcDataSetToJsonDataSet(dataSet);
+            
             //delete arguments
             jsonDataSet.Nodes.First().Children.RemoveAt(0);
 
-            //Blob
             return jsonDataSet;
 
             //param till wampservern callee procedure
             //JsonDataSet dataSet = GetView(String virtPath = "Area:\....esav", string area = "styrsystem1");
 
-            ///wampa över jsonDataSet
-            ///Deserialize
+            /// √ wampa över jsonDataSet
+            /// √ Deserialize
+            /// Save the un-filtered view
             ///accescontrol filter
+            /// 
             ///Change all bindings  (*....)
             ///blob
         }
