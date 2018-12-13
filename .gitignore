@@ -18,3 +18,4 @@
 /JsonData/bin/Release/netstandard2.0
 /WampClient/bin/Release
 /WampClient/obj/Release
+/EcWamp/obj/Debug

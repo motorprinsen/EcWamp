@@ -42,14 +42,19 @@ namespace EcWamp
             // We already have the the proj path in the EXOscada Function
             var projPath = @"C:\EXO Projects\Regin\";
             var fullAreaPath = $"{projPath}{area}";
-            //try
-            //{
-            //    domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
-            //}
-            //catch (System.AccessViolationException exception)
-            //{
-            //    Console.WriteLine("Unable to create domain.");
-            //}
+            try
+            {
+                //lock (EXOGLibSupport.busy)
+                {
+                    //EXO.EXOlib.SyncThread();
+                    DomainCx domain = new DomainCx();
+                    domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
+                }
+            }
+            catch (System.AccessViolationException exception)
+            {
+                Console.WriteLine("Unable to create domain.");
+            }
             string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
             return ParseEsavAndGenerateJsonDataSet(viewFile, projPath, area, defaultController, args);
