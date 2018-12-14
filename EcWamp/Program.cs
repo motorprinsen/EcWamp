@@ -2,7 +2,6 @@
 using ExoConfig.Query;
 using ExoConfig.Support;
 using JsonData;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +17,7 @@ namespace EcWamp
 {
     public interface IViewService
     {
-        [WampProcedure("com.arguments.getView")]
+        [WampProcedure("se.rssoftware.eos.getView")]
         JsonDataSet GetView(string area, string viewFile, object[] args);
     }
 
@@ -30,7 +29,7 @@ namespace EcWamp
             Console.WriteLine($"Are we 64bit right now? {Environment.Is64BitProcess}");
             // We already have the the proj path in the EXOscada Function
             var projPath = @"C:\EXO Projects\Regin";
-            var fullAreaPath = Path.Combine(projPath,area);
+            var fullAreaPath = Path.Combine(projPath, area);
             string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
             return ParseEsavAndGenerateJsonDataSet(viewFile, projPath, area, defaultController, args);
@@ -102,7 +101,7 @@ namespace EcWamp
             }
             //convert ec to json data
             var jsonDataSet = ConvertEcDataSetToJsonDataSet(dataSet);
-            
+
             //delete arguments
             jsonDataSet.Nodes.First().Children.RemoveAt(0);
 
@@ -114,10 +113,10 @@ namespace EcWamp
             /// √ wampa över jsonDataSet
             /// √ Deserialize
             /// Save the un-filtered view
-            ///accescontrol filter
-            /// 
-            ///Change all bindings  (*....)
-            ///blob
+            /// accescontrol filter
+            ///
+            /// Change all bindings  (*....)
+            /// blob
         }
 
         private JsonDataSet ConvertEcDataSetToJsonDataSet(EcDataSet source)

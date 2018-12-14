@@ -7,7 +7,7 @@ namespace WampClient
 {
     public interface IViewService
     {
-        [WampProcedure("com.arguments.getView")]
+        [WampProcedure("se.rssoftware.eos.getView")]
         JsonDataSet GetView(string area, string viewFile, object[] args);
     }
 
