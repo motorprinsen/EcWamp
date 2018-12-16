@@ -2,7 +2,6 @@
 using ExoConfig.Query;
 using ExoConfig.Support;
 using JsonData;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,22 +16,10 @@ using WampSharp.V2.Rpc;
 
 namespace EcWamp
 {
-    public interface IViewService
-    {
-        [WampProcedure("com.arguments.getView")]
-        JsonDataSet GetView(string area, string viewFile, object[] args);
-    }
-
+   
     public class ViewService : IViewService
     {
-       //private static DomainCx domain;
-
-       // static ViewService()
-       // {
-       //     Console.WriteLine($"About to create DomainCX on thread {Thread.CurrentThread.ManagedThreadId}");
-       //     domain = new DomainCx();
-       //     Console.WriteLine("Created DomainCX");
-       // }
+      
 
         [HandleProcessCorruptedStateExceptions]
         public JsonDataSet GetView(string area, string viewFile, object[] args)
@@ -41,25 +28,8 @@ namespace EcWamp
             Console.WriteLine($"Are we 64bit right now? {Environment.Is64BitProcess}");
             // We already have the the proj path in the EXOscada Function
             var projPath = @"C:\EXO Projects\Regin";
-            var fullAreaPath = $"{projPath}{area}";
-            //try
-            //{
-            //    lock (EXOGLibSupport.busy)
-            //    {
-            //        //EXO.EXOlib.SyncThread();
-            //        //DomainCx domain = new DomainCx();
-            //      // domain.Domain = new DomainCx.tAreaDomain(fullAreaPath);
-            //        var MyArea = new DomainCx.tAreaDomain(fullAreaPath);
-
-            //        var domain = new DomainCx();
-
-            //        domain.Domain = MyArea;
-            //    }
-            //}
-            //catch (System.AccessViolationException exception)
-            //{
-            //    Console.WriteLine("Unable to create domain.");
-            //}
+            var fullAreaPath = Path.Combine(projPath,area);
+           
             string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
             return ParseEsavAndGenerateJsonDataSet(viewFile, projPath, area, defaultController, args);
@@ -138,6 +108,10 @@ namespace EcWamp
             //delete arguments
             jsonDataSet.Nodes.First().Children.RemoveAt(0);
 
+            //flatten child elements
+            jsonDataSet.Nodes.First().Children = FlattenElements(jsonDataSet.Nodes.First().Children).ToList();
+
+
             //Blob
             return jsonDataSet;
 
@@ -150,7 +124,29 @@ namespace EcWamp
             ///Change all bindings  (*....)
             ///blob
         }
+        public static IEnumerable<JsonDataNode> FlattenElements(IEnumerable<JsonDataNode> items)
+        {
+            if (items == null || items.Count() == 0) return new List<JsonDataNode>();
 
+            var result = new List<JsonDataNode>();
+            var q = new Queue<JsonDataNode>(collection: items);
+
+            while (q.Count > 0)
+            {
+               
+                var item = q.Dequeue();
+                if (!(item.Type == "ElementsFolder" || item.Type == "ElementsGroup"))
+                {
+                    result.Add(item);
+                }
+
+                if (item?.Children?.Count() > 0)
+                    foreach (var child in item.Children)
+                        q.Enqueue(child);
+            }
+
+            return result;
+        }
         private JsonDataSet ConvertEcDataSetToJsonDataSet(EcDataSet source)
         {
             var result = new JsonDataSet
