@@ -1,33 +1,74 @@
 ﻿using JsonData;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using WampSharp.V2;
 using WampSharp.V2.Rpc;
-
+using System.Linq;
 namespace WampClient
 {
-    public interface IViewService
+   
+
+    public class ViewData
     {
-        [WampProcedure("com.arguments.getView")]
-        JsonDataSet GetView(string area, string viewFile, object[] args);
+        public string SubscriptionId { get; set; }
+        public string Blob { get; set; }
     }
 
     internal class Program
     {
         private static void Main(string[] args)
         {
+
+            var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
+
+
+            //get this from      var tab = TabSupport.DecodeTabId(encodedTabId);
+            ViewData vd =GetView("ReginSE","Styrsystem1", @"Area:\EXOFlex_1.Esav", viewArgs);
+            Console.ReadKey();
+        }
+        private static ViewData GetView(String userName,String area,string viewFile,string[] args)
+        {
             const string location = "ws://127.0.0.1:8080/";
             Console.WriteLine("Opening channel");
             DefaultWampChannelFactory channelFactory = new DefaultWampChannelFactory();
-
             IWampChannel channel = channelFactory.CreateJsonChannel(location, "views");
             channel.Open().Wait(5000);
             IViewService proxy = channel.RealmProxy.Services.GetCalleeProxy<IViewService>();
 
-            var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
-            var view = proxy.GetView("Styrsystem1", @"Area:\EXOFlex_1.Esav", viewArgs);
+         
+
+            //get filtered view for area
+            var view = proxy.GetView(area,viewFile,args);
+
+            //delete all elements with no access
+
+
+            Func<JsonDataNode,String, bool> filterFunc = (node, level) =>
+            {
+                foreach (KeyValuePair<string, object> o in node.Attributes)
+                {
+                    if (o.Key == "VisibleAccess")
+                        return AccessLevels.HasAccess(o.Value.ToString(), level);
+                }
+                return false;
+            };
+
+            //filter all childs
+            //TODO :  add user accesslevel
+            //var currentUserAccess = AccessSupport.GetCurrentUserAreaAccess(area, username);
+            String currentUserAccess = "Guest";
+            view.Nodes.First().Children = view.Nodes.First().Children.FilterAccess(currentUserAccess, filterFunc).ToList();
+
+            //Get all dynamicvalues from filtered view
+            //add this to a subscription list
+            List<DynamicValue> dynamicValueList = view.Nodes.First().GetDynamicValueList();
 
             Console.WriteLine(view);
-            Console.ReadKey();
+            string subId = $"{area}{viewFile}{userName}";
+            var json = JsonConvert.SerializeObject(view);
+            return new ViewData() { SubscriptionId = subId, Blob = json };
+
         }
     }
 }

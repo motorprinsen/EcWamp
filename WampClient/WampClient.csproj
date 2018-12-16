@@ -56,6 +56,9 @@
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\packages\Castle.Core.4.2.1\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Fleck, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fleck.1.0.3\lib\net45\Fleck.dll</HintPath>
+    </Reference>
     <Reference Include="MsgPack, Version=0.6.0.0, Culture=neutral, PublicKeyToken=a2625990d5dc0167, processorArchitecture=MSIL">
       <HintPath>..\packages\MsgPack.Cli.0.6.2\lib\net45\MsgPack.dll</HintPath>
     </Reference>
@@ -122,6 +125,12 @@
     <Reference Include="WampSharp.Default.Client, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WampSharp.Default.Client.18.11.1\lib\net46\WampSharp.Default.Client.dll</HintPath>
     </Reference>
+    <Reference Include="WampSharp.Default.Router, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WampSharp.Default.Router.18.11.1\lib\net46\WampSharp.Default.Router.dll</HintPath>
+    </Reference>
+    <Reference Include="WampSharp.Fleck, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WampSharp.Fleck.18.11.1\lib\net46\WampSharp.Fleck.dll</HintPath>
+    </Reference>
     <Reference Include="WampSharp.NewtonsoftJson, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WampSharp.NewtonsoftJson.18.11.1\lib\net46\WampSharp.NewtonsoftJson.dll</HintPath>
     </Reference>
@@ -137,6 +146,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessControl.cs" />
+    <Compile Include="Extensions\ExtensionMethods.cs" />
+    <Compile Include="FileOp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
