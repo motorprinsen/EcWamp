@@ -20,14 +20,14 @@ namespace WampClient
         private static void Main(string[] args)
         {
 
-            var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
+            var viewArgs = new[] { @"Area:\EXOFlex2.Esav", "EXOFlex2", "EXOFlex2_Tab" };
 
 
             //get this from      var tab = TabSupport.DecodeTabId(encodedTabId);
-            ViewData vd =GetView("ReginSE","Styrsystem1", @"Area:\EXOFlex_1.Esav", viewArgs);
+            ViewData vd =GetView("ReginSE","Styrsystem1", viewArgs);
             Console.ReadKey();
         }
-        private static ViewData GetView(String userName,String area,string viewFile,string[] args)
+        private static ViewData GetView(String userName,String area,string[] args)
         {
             const string location = "ws://127.0.0.1:8080/";
             Console.WriteLine("Opening channel");
@@ -39,7 +39,7 @@ namespace WampClient
          
 
             //get filtered view for area
-            var view = proxy.GetView(area,viewFile,args);
+            var view = proxy.GetView(area,args);
 
             //delete all elements with no access
 
@@ -65,7 +65,7 @@ namespace WampClient
             List<DynamicValue> dynamicValueList = view.Nodes.First().GetDynamicValueList();
 
             Console.WriteLine(view);
-            string subId = $"{area}{viewFile}{userName}";
+            string subId = $"{area}{""}{userName}";
             var json = JsonConvert.SerializeObject(view);
             return new ViewData() { SubscriptionId = subId, Blob = json };
 
