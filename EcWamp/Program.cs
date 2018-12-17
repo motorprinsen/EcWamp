@@ -19,10 +19,10 @@ namespace EcWamp
    
     public class ViewService : IViewService
     {
-      
+
 
         [HandleProcessCorruptedStateExceptions]
-        public JsonDataSet GetView(string area, string viewFile, object[] args)
+        public JsonDataSet GetView(string area,  object[] args)
         {
             Console.WriteLine($"Getting view on thread {Thread.CurrentThread.ManagedThreadId}");
             Console.WriteLine($"Are we 64bit right now? {Environment.Is64BitProcess}");
@@ -32,12 +32,13 @@ namespace EcWamp
            
             string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
-            return ParseEsavAndGenerateJsonDataSet(viewFile, projPath, area, defaultController, args);
+            return ParseEsavAndGenerateJsonDataSet(projPath, area, defaultController, args);
         }
 
-        private JsonDataSet ParseEsavAndGenerateJsonDataSet(string viewFile, string projPath, string area, string defaultController, object[] args)
+        private JsonDataSet ParseEsavAndGenerateJsonDataSet(string projPath, string area, string defaultController, object[] args)
         {
             WFRuntimeArguments parser = new WFRuntimeArguments(args);
+           
             //string filepath = "";
             var esavFormat = new EcQuery("Esav");
             if (!EXO.EXOlib.CheckIdentifier(parser.ViewName))
@@ -50,9 +51,9 @@ namespace EcWamp
             //var filepath = domain.TransVirtPath(viewFile);
             DomainCx domain = FileOp.CreateDomain(projPath, area);
 
-            //var filepath = FileOp.getPath(projPath, area, viewFile);
 
-           var filepath = domain.GetPath(viewFile);
+            //Get full path to viewfile
+           var filepath = domain.GetPath(parser.ViewFile);
             FileInfo f = new FileInfo(filepath);
             if (!f.Exists)
             {
@@ -109,6 +110,7 @@ namespace EcWamp
             jsonDataSet.Nodes.First().Children.RemoveAt(0);
 
             //flatten child elements
+            //TODO : flatten all?
             jsonDataSet.Nodes.First().Children = FlattenElements(jsonDataSet.Nodes.First().Children).ToList();
 
 
@@ -194,6 +196,8 @@ namespace EcWamp
 
             return result;
         }
+
+      
     }
 
     public class WampServer
@@ -219,8 +223,10 @@ namespace EcWamp
         private static void Main(string[] args)
         {
             var viewService = new ViewService();
-            var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
-            var view = viewService.GetView("Styrsystem1", @"Area:\EXOFlex_1.Esav", viewArgs);
+            var viewArgs = new[] { @"Area:\EXOFlex.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_Tab" };
+
+            //var viewArgs = new[] { @"Area:\EXOFlex_1.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_1_Tab", "(Default)", "ss" };
+            var view = viewService.GetView("Styrsystem1", viewArgs);
 
             new WampServer().Start();
             new AutoResetEvent(false).WaitOne();
