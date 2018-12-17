@@ -1,4 +1,5 @@
-﻿using EXO;
+﻿using EcWamp.Subscriptions;
+using EXO;
 using ExoConfig.Query;
 using ExoConfig.Support;
 using JsonData;
@@ -12,24 +13,20 @@ using System.Threading.Tasks;
 using SystemEx;
 using WampSharp.V2;
 using WampSharp.V2.Realm;
-using WampSharp.V2.Rpc;
 
 namespace EcWamp
 {
-   
     public class ViewService : IViewService
     {
-
-
         [HandleProcessCorruptedStateExceptions]
-        public JsonDataSet GetView(string area,  object[] args)
+        public JsonDataSet GetView(string area, object[] args)
         {
             Console.WriteLine($"Getting view on thread {Thread.CurrentThread.ManagedThreadId}");
             Console.WriteLine($"Are we 64bit right now? {Environment.Is64BitProcess}");
             // We already have the the proj path in the EXOscada Function
             var projPath = @"C:\EXO Projects\Regin";
-            var fullAreaPath = Path.Combine(projPath,area);
-           
+            var fullAreaPath = Path.Combine(projPath, area);
+
             string defaultController = ExoProjectSupport.GetDefaultController(fullAreaPath);
 
             return ParseEsavAndGenerateJsonDataSet(projPath, area, defaultController, args);
@@ -38,7 +35,7 @@ namespace EcWamp
         private JsonDataSet ParseEsavAndGenerateJsonDataSet(string projPath, string area, string defaultController, object[] args)
         {
             WFRuntimeArguments parser = new WFRuntimeArguments(args);
-           
+
             //string filepath = "";
             var esavFormat = new EcQuery("Esav");
             if (!EXO.EXOlib.CheckIdentifier(parser.ViewName))
@@ -51,9 +48,8 @@ namespace EcWamp
             //var filepath = domain.TransVirtPath(viewFile);
             DomainCx domain = FileOp.CreateDomain(projPath, area);
 
-
             //Get full path to viewfile
-           var filepath = domain.GetPath(parser.ViewFile);
+            var filepath = domain.GetPath(parser.ViewFile);
             FileInfo f = new FileInfo(filepath);
             if (!f.Exists)
             {
@@ -113,7 +109,6 @@ namespace EcWamp
             //TODO : flatten all?
             jsonDataSet.Nodes.First().Children = FlattenElements(jsonDataSet.Nodes.First().Children).ToList();
 
-
             //Blob
             return jsonDataSet;
 
@@ -126,6 +121,7 @@ namespace EcWamp
             ///Change all bindings  (*....)
             ///blob
         }
+
         public static IEnumerable<JsonDataNode> FlattenElements(IEnumerable<JsonDataNode> items)
         {
             if (items == null || items.Count() == 0) return new List<JsonDataNode>();
@@ -135,7 +131,6 @@ namespace EcWamp
 
             while (q.Count > 0)
             {
-               
                 var item = q.Dequeue();
                 if (!(item.Type == "ElementsFolder" || item.Type == "ElementsGroup"))
                 {
@@ -149,6 +144,7 @@ namespace EcWamp
 
             return result;
         }
+
         private JsonDataSet ConvertEcDataSetToJsonDataSet(EcDataSet source)
         {
             var result = new JsonDataSet
@@ -196,8 +192,6 @@ namespace EcWamp
 
             return result;
         }
-
-      
     }
 
     public class WampServer
@@ -222,6 +216,8 @@ namespace EcWamp
     {
         private static void Main(string[] args)
         {
+            TestMasterList();
+
             var viewService = new ViewService();
             var viewArgs = new[] { @"Area:\EXOFlex.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_Tab" };
 
@@ -231,6 +227,21 @@ namespace EcWamp
             new WampServer().Start();
             new AutoResetEvent(false).WaitOne();
             Console.ReadKey();
+        }
+
+        private static void TestMasterList()
+        {
+            var masterList = new MasterList(variable => Console.WriteLine($"Heard that {variable} was evicted from the MasterList"));
+            masterList.Add("Controller1.OutdoorTemp");
+            masterList.Add("controller1.outdoortemp");
+            masterList.Add("Controller2.RoomTemp");
+
+            var refs1 = masterList.References("controller1.outdoortemp");
+            Console.WriteLine($"controller1.outdoortemp has {refs1} refs");
+
+            masterList.Remove("CONTROLLER1.OUTDOORTEMP");
+            masterList.Remove("Controller2.RoomTemp");
+            masterList.Remove("Controller1.OutdoorTemp");
         }
     }
 }
