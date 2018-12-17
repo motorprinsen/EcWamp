@@ -23,7 +23,7 @@ namespace EcWamp
         {
             Arguments = new DiagnosticDictionary<string, string>();
             Type = WindowTypes.system;
-            Path = "";
+            ViewFile = "";
             ViewName = "Internal" + Numbers.NextWindowToString();
             ViewTitle = "";
         }
@@ -39,7 +39,7 @@ namespace EcWamp
 
             ViewTitle = "";
             URL = "";
-            Path = inargs[0] as string;
+            ViewFile = inargs[0] as string;
             ParseFileArgument(inargs[0]); //parse file argument, always the first argument to open---- call. 
 
             List<string> tmp = (
@@ -52,7 +52,7 @@ namespace EcWamp
 
             if (Type == WindowTypes.esbiv || Type == WindowTypes.eshv)
             {
-                var c = new WindowTypeConfig(ViewName, Path, ViewTitle, tmp, AreaName);
+                var c = new WindowTypeConfig(ViewName, ViewFile, ViewTitle, tmp, AreaName);
                 URL = c.URL;
                 Arguments = c.Arguments;
                 SubType = c.SubType;
@@ -86,7 +86,7 @@ namespace EcWamp
 
         public WindowTypes Type { get; private set; }
 
-        public string Path { get; private set; }
+        public string ViewFile { get; private set; }
         public string ViewName { get; private set; }
         public string ViewTitle { get; private set; }
         public DiagnosticDictionary<string, string> Arguments { get; private set; }
