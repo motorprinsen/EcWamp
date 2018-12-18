@@ -17,20 +17,20 @@ namespace WampClient
                 }
             }
         }
-        public static List<DynamicValue> GetDynamicValueList(this JsonDataNode dataNode)
+        public static List<BindableElement> GetBindableElementsList(this JsonDataNode dataNode)
         {
-            return GetDynamicValue(dataNode, new List<DynamicValue>(), null);
-            List<DynamicValue> GetDynamicValue(JsonDataNode node, List<DynamicValue> dynamicValueList, String childIndexes = null)
+            return GetBindableElement(dataNode, new List<BindableElement>(), null);
+            List<BindableElement> GetBindableElement(JsonDataNode node, List<BindableElement> bindableElementsList, String childIndexes = null)
             {
                 foreach (var attribute in node.Attributes)
                 {
                     if (attribute.Value.ToString().StartsWith("*"))
                     {
-                        DynamicValue dv = new DynamicValue();
-                        dv.Name = attribute.Key.ToString();
-                        dv.Value = attribute.Value.ToString();
-                        dv.ChildIndex = childIndexes;
-                        dynamicValueList.Add(dv);
+                        BindableElement dv = new BindableElement();
+                        dv.AttributeName = attribute.Key.ToString();
+                        dv.BindingAddress = attribute.Value.ToString();
+                        dv.ElementIndex = childIndexes;
+                        bindableElementsList.Add(dv);
                     }
 
 
@@ -38,10 +38,10 @@ namespace WampClient
                 int index = 0;
                 foreach (var child in node.Children)
                 {
-                    GetDynamicValue(child, dynamicValueList, childIndexes == null ? index.ToString() : childIndexes + "," + index.ToString());
+                    GetBindableElement(child, bindableElementsList, childIndexes == null ? index.ToString() : childIndexes + "," + index.ToString());
                     index++;
                 }
-                return dynamicValueList;
+                return bindableElementsList;
             }
 
 

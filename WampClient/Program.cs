@@ -62,7 +62,7 @@ namespace WampClient
 
             //Get all dynamicvalues from filtered view
             //add this to a subscription list
-            List<DynamicValue> dynamicValueList = view.Nodes.First().GetDynamicValueList();
+            List<BindableElement> bindableElementsList = view.Nodes.First().GetBindableElementsList();
 
             Console.WriteLine(view);
             string subId = $"{area}{""}{userName}";

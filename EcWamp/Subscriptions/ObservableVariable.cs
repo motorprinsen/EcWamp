@@ -8,7 +8,7 @@ using System.Collections;
 
 namespace EcWamp.Subscriptions
 {
-    public class ObservableVariable : IEqualityComparer<ObservableVariable>
+    public class ObservableVariable : IEqualityComparer<ObservableVariable>, IObservable<ObservableVariable>
     {
         public string TechnicalAddress { get; set; }
         public object Value { get; set; }
@@ -21,6 +21,11 @@ namespace EcWamp.Subscriptions
         public int GetHashCode(ObservableVariable obj)
         {
             return obj.TechnicalAddress.ToLower().GetHashCode();
+        }
+
+        public IDisposable Subscribe(IObserver<ObservableVariable> observer)
+        {
+            throw new NotImplementedException();
         }
     }
 }
