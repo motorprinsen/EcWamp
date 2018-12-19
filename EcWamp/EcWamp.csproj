@@ -237,6 +237,7 @@
     <Compile Include="DiagnosticDictionary.cs" />
     <Compile Include="EXOGLibSupport.cs" />
     <Compile Include="FileOp.cs" />
+    <Compile Include="MockScadaFunction.cs" />
     <Compile Include="Numbers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
