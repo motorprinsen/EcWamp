@@ -23,19 +23,22 @@ namespace EcWamp
                 {
                     if(subscriptions.Count > 0)
                     {
-                        foreach (var variable in subscriptions)
+                        lock (subscriptions)
                         {
-                            var message = new DataStoreMessage()
+                            foreach (var variable in subscriptions)
                             {
-                                Timestamp = DateTime.Now,
-                                Type = DataStoreMessageType.Update,
-                                Variable = variable,
-                                Value = random.NextDouble() * 100
-                            };
-                            Console.WriteLine($"Mocking {message.Value} for {message.Variable}");
-                            subject.OnNext(message);
+                                var message = new DataStoreMessage()
+                                {
+                                    Timestamp = DateTime.Now,
+                                    Type = DataStoreMessageType.Update,
+                                    Variable = variable,
+                                    Value = random.NextDouble() * 100
+                                };
+                                Console.WriteLine($"Mocking {message.Value} for {message.Variable}");
+                                subject.OnNext(message);
 
-                            Thread.Sleep(1000);
+                                Thread.Sleep(1000);
+                            }
                         }
                     }
                 }
@@ -59,10 +62,13 @@ namespace EcWamp
 
         public Task<DataStoreMessage> Read(string variable)
         {
-            if(!subscriptions.Contains(variable.ToLower()))
+            lock (subscriptions)
             {
-                subscriptions.Add(variable.ToLower());
-                Console.WriteLine($"Added subscription for {variable}");
+                if (!subscriptions.Contains(variable.ToLower()))
+                {
+                    subscriptions.Add(variable.ToLower());
+                    Console.WriteLine($"Added subscription for {variable}");
+                }
             }
 
             var message = new DataStoreMessage()
