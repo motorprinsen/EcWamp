@@ -1,5 +1,4 @@
-﻿using EcWamp.Subscriptions;
-using EXO;
+﻿using EXO;
 using ExoConfig.Query;
 using ExoConfig.Support;
 using JsonData;
@@ -216,8 +215,6 @@ namespace EcWamp
     {
         private static void Main(string[] args)
         {
-            TestMasterList();
-
             var viewService = new ViewService();
             var viewArgs = new[] { @"Area:\EXOFlex.Esav", "EXOFlex %MsgProj(200257)%", "EXOFlex_Tab" };
 
@@ -227,21 +224,6 @@ namespace EcWamp
             new WampServer().Start();
             new AutoResetEvent(false).WaitOne();
             Console.ReadKey();
-        }
-
-        private static void TestMasterList()
-        {
-            var masterList = new MasterList(variable => Console.WriteLine($"Heard that {variable} was evicted from the MasterList"));
-            masterList.Add("Controller1.OutdoorTemp");
-            masterList.Add("controller1.outdoortemp");
-            masterList.Add("Controller2.RoomTemp");
-
-            var refs1 = masterList.References("controller1.outdoortemp");
-            Console.WriteLine($"controller1.outdoortemp has {refs1} refs");
-
-            masterList.Remove("CONTROLLER1.OUTDOORTEMP");
-            masterList.Remove("Controller2.RoomTemp");
-            masterList.Remove("Controller1.OutdoorTemp");
         }
     }
 }
