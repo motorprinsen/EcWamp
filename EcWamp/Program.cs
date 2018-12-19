@@ -53,7 +53,8 @@ namespace EcWamp
             FileInfo f = new FileInfo(filepath);
             if (!f.Exists)
             {
-                throw new FileNotFoundException("The call has an invalid File parameter. The file does not exist. (" + filepath + ")");
+                //throw new FileNotFoundException("The call has an invalid File parameter. The file does not exist. (" + filepath + ")");
+                return null;
             }
 
             var argumentDataSet = esavFormat.GetData(filepath, new DiagnosticDictionary<string, string>(), domain);

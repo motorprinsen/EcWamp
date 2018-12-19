@@ -52,7 +52,7 @@ namespace WampClient
             var viewArgs = new[] { @"Area:\EXOFlex2.Esav", "EXOFlex2", "EXOFlex2_Tab" };
 
             //get this from      var tab = TabSupport.DecodeTabId(encodedTabId);
-            //ViewData vd = GetView("ReginSE", "Styrsystem1", viewArgs);
+            ViewData vd = GetView("ReginSE", "Styrsystem1", viewArgs);
             Console.ReadKey();
 
             subscription.Dispose();
@@ -63,12 +63,16 @@ namespace WampClient
         private static void TestRead()
         {
             operationsProxy.Read("Controller1.OutdoorTemp");
+            operationsProxy.Read("Controller1.OutdoorTemp");
+            operationsProxy.Read("Controller1.RoomTemp");
         }
 
         private static ViewData GetView(String userName, String area, string[] args)
         {
             //get filtered view for area
             var view = viewsProxy.GetView(area, args);
+
+            if (view == null) return null;
 
             //delete all elements with no access
 
