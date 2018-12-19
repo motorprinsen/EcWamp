@@ -218,7 +218,7 @@
     <Compile Include="DataStore\WampChannelTimeOutReconnector.cs" />
     <Compile Include="Extensions\ExtensionMethods.cs" />
     <Compile Include="FileOp.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="ClientMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Subscriptions\MasterList.cs" />
     <Compile Include="Subscriptions\ObservableVariable.cs" />

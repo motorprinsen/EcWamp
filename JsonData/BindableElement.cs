@@ -6,6 +6,6 @@ namespace JsonData
     {
         public string AttributeName { get; set; }
         public string BindingAddress { get; set; }
-        public String ElementIndex { get; set; }
+        public string ElementIndex { get; set; }
     }
 }

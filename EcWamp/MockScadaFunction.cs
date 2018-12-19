@@ -10,14 +10,11 @@ namespace EcWamp
     public class MockScadaFunction : IOperationsService
     {
         private readonly List<string> subscriptions = new List<string>();
-        //private readonly ISubject<DataStoreMessage> subject;
-        private readonly Task updater;
         private readonly Random random = new Random();
 
         public MockScadaFunction(ISubject<DataStoreMessage> @subject)
         {
-            //subject = @subject;
-            updater = Task.Run(() =>
+            Task.Run(() =>
             {
                 while (true)
                 {

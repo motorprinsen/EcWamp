@@ -1,5 +1,6 @@
 ﻿using EcWamp.Subscriptions;
 using EXOscadaAPI.Protocols;
+using EXOScadaAPI.DataStore;
 using EXOScadaAPI.DataStore.Wamp;
 using JsonData;
 using Newtonsoft.Json;
@@ -16,7 +17,7 @@ namespace WampClient
         public string Blob { get; set; }
     }
 
-    internal class Program
+    internal class ClientMain
     {
         const string location = "ws://127.0.0.1:8080/";
         static IViewService viewsProxy;
@@ -41,11 +42,11 @@ namespace WampClient
             operationsChannel.Open().Wait(5000);
             operationsProxy = operationsChannel.RealmProxy.Services.GetCalleeProxy<IOperationsService>();
 
-            subscription = operationsChannel.RealmProxy.Services.GetSubject<DataStoreMessage>("subscriptions")
-                   .Subscribe(x =>
-                   {
-                       Console.WriteLine($"WampClient got update from server: {x.Variable} -> {x.Value}");
-                   });
+            //subscription = operationsChannel.RealmProxy.Services.GetSubject<DataStoreMessage>("subscriptions")
+            //       .Subscribe(x =>
+            //       {
+            //           Console.WriteLine($"WampClient got update from server: {x.Variable} -> {x.Value}");
+            //       });
 
             TestRead();
 
@@ -62,9 +63,15 @@ namespace WampClient
 
         private static void TestRead()
         {
-            operationsProxy.Read("Controller1.OutdoorTemp");
-            operationsProxy.Read("Controller1.OutdoorTemp");
-            operationsProxy.Read("Controller1.RoomTemp");
+            var dataStore = new DataStore("127.0.0.1", "", 8080, "");
+            dataStore.Open();
+            var msg1 = dataStore.Read("Controller1.OutdoorTemp");
+            var msg2 = dataStore.Read("Controller1.OutdoorTemp");
+            var msg3 = dataStore.Read("Controller1.RoomTemp");
+
+            Console.WriteLine($"Got {msg1.Result.Value} for {msg1.Result.Variable}");
+            Console.WriteLine($"Got {msg2.Result.Value} for {msg2.Result.Variable}");
+            Console.WriteLine($"Got {msg3.Result.Value} for {msg3.Result.Variable}");
         }
 
         private static ViewData GetView(String userName, String area, string[] args)
