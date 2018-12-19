@@ -1,4 +1,6 @@
 ﻿using EcWamp.Subscriptions;
+using EXOscadaAPI.Protocols;
+using EXOScadaAPI.DataStore.Wamp;
 using JsonData;
 using Newtonsoft.Json;
 using System;
@@ -16,28 +18,52 @@ namespace WampClient
 
     internal class Program
     {
+        const string location = "ws://127.0.0.1:8080/";
+        static IViewService viewsProxy;
+        static IWampChannel viewsChannel;
+
+        static IOperationsService operationsProxy;
+        static IWampChannel operationsChannel;
+
         private static void Main(string[] args)
         {
             TestMasterList();
 
+            Console.WriteLine("Opening channel");
+            DefaultWampChannelFactory channelFactory = new DefaultWampChannelFactory();
+
+            viewsChannel = channelFactory.CreateJsonChannel(location, "views");
+            viewsChannel.Open().Wait(5000);
+            viewsProxy = viewsChannel.RealmProxy.Services.GetCalleeProxy<IViewService>();
+
+            operationsChannel = channelFactory.CreateJsonChannel(location, "data");
+            operationsChannel.Open().Wait(5000);
+            operationsProxy = operationsChannel.RealmProxy.Services.GetCalleeProxy<IOperationsService>();
+
+            operationsChannel.RealmProxy.Services.GetSubject<DataStoreMessage>("subscriptions")
+                   .Subscribe(x =>
+                   {
+                       Console.WriteLine($"WampClient got update from server: {x.Variable} -> {x.Value}");
+                   });
+
+            TestRead();
+
             var viewArgs = new[] { @"Area:\EXOFlex2.Esav", "EXOFlex2", "EXOFlex2_Tab" };
 
             //get this from      var tab = TabSupport.DecodeTabId(encodedTabId);
-            ViewData vd = GetView("ReginSE", "Styrsystem1", viewArgs);
+            //ViewData vd = GetView("ReginSE", "Styrsystem1", viewArgs);
             Console.ReadKey();
+        }
+
+        private static void TestRead()
+        {
+            operationsProxy.Read("Controller1.OutdoorTemp");
         }
 
         private static ViewData GetView(String userName, String area, string[] args)
         {
-            const string location = "ws://127.0.0.1:8080/";
-            Console.WriteLine("Opening channel");
-            DefaultWampChannelFactory channelFactory = new DefaultWampChannelFactory();
-            IWampChannel channel = channelFactory.CreateJsonChannel(location, "views");
-            channel.Open().Wait(5000);
-            IViewService proxy = channel.RealmProxy.Services.GetCalleeProxy<IViewService>();
-
             //get filtered view for area
-            var view = proxy.GetView(area, args);
+            var view = viewsProxy.GetView(area, args);
 
             //delete all elements with no access
 

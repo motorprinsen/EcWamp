@@ -1,4 +1,5 @@
-﻿using EXO;
+﻿using EcWamp.DataStore;
+using EXO;
 using ExoConfig.Query;
 using ExoConfig.Support;
 using JsonData;
@@ -196,18 +197,27 @@ namespace EcWamp
     public class WampServer
     {
         private DefaultWampHost wampHost;
-        private IWampHostedRealm realm;
+        private IWampHostedRealm viewsRealm;
+        private IWampHostedRealm dataRealm;
         private readonly ViewService viewService = new ViewService();
 
         public void Start()
         {
             var location = "ws://127.0.0.1:8080/";
             wampHost = new DefaultWampHost(location);
-            realm = wampHost.RealmContainer.GetRealmByName("views");
-            Task<IAsyncDisposable> registrationTask = realm.Services.RegisterCallee(viewService);
-            registrationTask.Wait();
+            viewsRealm = wampHost.RealmContainer.GetRealmByName("views");
+            dataRealm = wampHost.RealmContainer.GetRealmByName("data");
+
             wampHost.Open();
             Console.WriteLine($"Wamp server started at {location}");
+
+            Task<IAsyncDisposable> viewServiceRegistration = viewsRealm.Services.RegisterCallee(viewService);
+            viewServiceRegistration.Wait();
+
+            var subject = dataRealm.Services.GetSubject<DataStoreMessage>("subscriptions");
+
+            Task<IAsyncDisposable> scadaFunctionRegistration = dataRealm.Services.RegisterCallee(new MockScadaFunction(subject));
+            scadaFunctionRegistration.Wait();
         }
     }
 
