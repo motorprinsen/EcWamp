@@ -24,6 +24,7 @@ namespace WampClient
 
         static IOperationsService operationsProxy;
         static IWampChannel operationsChannel;
+        static IDisposable subscription;
 
         private static void Main(string[] args)
         {
@@ -40,7 +41,7 @@ namespace WampClient
             operationsChannel.Open().Wait(5000);
             operationsProxy = operationsChannel.RealmProxy.Services.GetCalleeProxy<IOperationsService>();
 
-            operationsChannel.RealmProxy.Services.GetSubject<DataStoreMessage>("subscriptions")
+            subscription = operationsChannel.RealmProxy.Services.GetSubject<DataStoreMessage>("subscriptions")
                    .Subscribe(x =>
                    {
                        Console.WriteLine($"WampClient got update from server: {x.Variable} -> {x.Value}");
@@ -53,6 +54,10 @@ namespace WampClient
             //get this from      var tab = TabSupport.DecodeTabId(encodedTabId);
             //ViewData vd = GetView("ReginSE", "Styrsystem1", viewArgs);
             Console.ReadKey();
+
+            subscription.Dispose();
+            operationsChannel.Close();
+            viewsChannel.Close();
         }
 
         private static void TestRead()
