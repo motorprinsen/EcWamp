@@ -1,4 +1,5 @@
-﻿using EXOScadaAPI.DataStore;
+﻿using EXOscadaAPI.Interfaces.Logging;
+using EXOScadaAPI.DataStore;
 using JsonData;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,14 @@ namespace EcWamp.Subscriptions
     {
         public Dictionary<string, SubscriptionStream> Streams { get; private set; } = new Dictionary<string, SubscriptionStream>();
         private readonly MasterList masterList =  new MasterList(evictedVariable => Console.WriteLine($"SS: Heard that {evictedVariable} was evicted from the MasterList"));
+        private readonly ILog log = LogProvider.GetCurrentClassLogger();
 
         public SubscriptionStream GetStream(string subscriptionId, List<BindableElement> bindableElements)
         {
             // If it already exists, return it
             if (Streams.ContainsKey(subscriptionId)) return Streams[subscriptionId];
+
+            log.Debug($"Creating a new Stream for {subscriptionId}");
 
             var stream = new SubscriptionStream();
             foreach (var bindableElement in bindableElements)
@@ -27,13 +31,14 @@ namespace EcWamp.Subscriptions
             return stream;
         }
 
-        public void Remove(string sid)
+        public void Remove(string subscriptionId)
         {
-            if(Streams.ContainsKey(sid))
+            if(Streams.ContainsKey(subscriptionId))
             {
-                var stream = Streams[sid];
+                log.Debug($"Removing subscriptionId: {subscriptionId}");
+                var stream = Streams[subscriptionId];
                 masterList.Remove(stream);
-                Streams.Remove(sid);
+                Streams.Remove(subscriptionId);
             }
         }
 
@@ -42,6 +47,7 @@ namespace EcWamp.Subscriptions
             private readonly Dictionary<string, (ObservableVariable Variable, int RefCounter)> _variables = new Dictionary<string, (ObservableVariable Variable, int RefCounter)>(1000);
             private readonly Action<string> _evictionHandler;
             private readonly DataStore _dataStore;
+            private readonly ILog log = LogProvider.GetCurrentClassLogger();
 
             // TODO: We need to DI the DataStore, but we do it manually as for now
             public MasterList(Action<string> evictionHandler /*, IDataStore dataStore*/)
@@ -62,7 +68,7 @@ namespace EcWamp.Subscriptions
                     var variable = message.Variable.ToLower();
                     if (_variables.ContainsKey(variable))
                     {
-                        Console.WriteLine($"Updating the value for {variable} to {value}");
+                        log.Debug($"Updating the value for {variable} to {value}");
 
                         var tuple = _variables[variable];
                         tuple.Variable.Value = value;
@@ -82,7 +88,7 @@ namespace EcWamp.Subscriptions
                     if (_variables.ContainsKey(variable))
                     {
                         // Yes it did. Increment the refCounter and return the ObservableVariable
-                        Console.WriteLine($"{variable} is already in the MasterList");
+                        log.Debug($"{variable} is already in the MasterList");
                         var tuple = _variables[variable];
                         tuple.RefCounter++;
                         _variables[variable] = tuple;
@@ -91,7 +97,7 @@ namespace EcWamp.Subscriptions
                     else
                     {
                         // No it didn't, so lets create it
-                        Console.WriteLine($"Adding {variable} to the MasterList");
+                        log.Debug($"Adding {variable} to the MasterList");
                         var tuple = (Variable: new ObservableVariable() { TechnicalAddress = variable }, RefCounter: 1);
                         _variables.Add(variable, tuple);
 
@@ -134,7 +140,7 @@ namespace EcWamp.Subscriptions
                 {
                     if (!_variables.ContainsKey(variable))
                     {
-                        Console.WriteLine("Trying to remove an unregistered variable!");
+                        log.Debug("Trying to remove an unregistered variable!");
                     }
                     else
                     {
@@ -144,7 +150,7 @@ namespace EcWamp.Subscriptions
 
                         if (tuple.RefCounter < 1)
                         {
-                            Console.WriteLine($"No more registered listeners for {variable}");
+                            log.Debug($"No more registered listeners for {variable}");
                             _variables.Remove(variable);
                             _evictionHandler(variable);
                         }
@@ -160,13 +166,13 @@ namespace EcWamp.Subscriptions
                 {
                     if (!_variables.ContainsKey(variable))
                     {
-                        Console.WriteLine("Trying to count references of an unregistered variable!");
+                        log.Debug("Trying to count references of an unregistered variable!");
                         return -1;
                     }
                     else
                     {
                         var (Variable, RefCounter) = _variables[variable];
-                        Console.WriteLine($"{variable} currently has {RefCounter} references");
+                        log.Debug($"{variable} currently has {RefCounter} references");
                         return RefCounter;
                     }
                 }
