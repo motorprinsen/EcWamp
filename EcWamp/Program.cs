@@ -18,7 +18,6 @@ namespace EcWamp
 {
     public class ViewService : IViewService
     {
-        [HandleProcessCorruptedStateExceptions]
         public JsonDataSet GetView(string area, object[] args)
         {
             Console.WriteLine($"Getting view on thread {Thread.CurrentThread.ManagedThreadId}");
