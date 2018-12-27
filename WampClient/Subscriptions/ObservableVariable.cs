@@ -10,6 +10,7 @@ namespace EcWamp.Subscriptions
 {
     public class ObservableVariable : IEqualityComparer<ObservableVariable>, IObservable<ObservableVariable>
     {
+        private IObserver<ObservableVariable> _observer;
         public string TechnicalAddress { get; set; }
         public object Value { get; set; }
 
@@ -25,7 +26,8 @@ namespace EcWamp.Subscriptions
 
         public IDisposable Subscribe(IObserver<ObservableVariable> observer)
         {
-            throw new NotImplementedException();
+            _observer = observer;
+            return null;
         }
     }
 }

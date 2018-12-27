@@ -213,6 +213,7 @@
     <Compile Include="DataStore\CallbackMemoryCache.cs" />
     <Compile Include="DataStore\DataStore.cs" />
     <Compile Include="DataStore\DataStoreMessage.cs" />
+    <Compile Include="DataStore\IDataStore.cs" />
     <Compile Include="DataStore\IOperationsService.cs" />
     <Compile Include="DataStore\LibLog.cs" />
     <Compile Include="DataStore\WampChannelTimeOutReconnector.cs" />

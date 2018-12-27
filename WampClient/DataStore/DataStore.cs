@@ -16,7 +16,7 @@ namespace EXOScadaAPI.DataStore
 {
     public delegate void DataMessageDelegate(DataStoreMessage message);
 
-    public class DataStore
+    public class DataStore : IDataStore
     {
         private Cache<IOperationsService> _repositoryCache;
         private CallbackMemoryCache _cacheImpl;

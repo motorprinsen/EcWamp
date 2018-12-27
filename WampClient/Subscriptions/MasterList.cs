@@ -1,6 +1,8 @@
-﻿using JsonData;
+﻿using EXOScadaAPI.DataStore;
+using JsonData;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 
 namespace EcWamp.Subscriptions
 {
@@ -8,15 +10,38 @@ namespace EcWamp.Subscriptions
     {
         private readonly Dictionary<string, (ObservableVariable Variable, int RefCounter)> _variables = new Dictionary<string, (ObservableVariable Variable, int RefCounter)>(1000);
         private readonly Action<string> _evictionHandler;
+        private readonly DataStore _dataStore;
 
-        // TODO: We need to reference the DataStore and hook up to OnDataChanged
-
-        public MasterList(Action<string> evictionHandler)
+        // TODO: We need to DI the DataStore, but we do it manually as for now
+        public MasterList(Action<string> evictionHandler /*, IDataStore dataStore*/)
         {
             _evictionHandler = evictionHandler;
+
+            _dataStore = new DataStore("127.0.0.1", "", 8080, "");
+            _dataStore.Open();
+
+            _dataStore.DataChanged += DataStore_DataChanged;
         }
 
-        public ObservableVariable Add(string variable)
+        private void DataStore_DataChanged(EXOscadaAPI.Protocols.DataStoreMessage message)
+        {
+            if(message.Type == EXOscadaAPI.Protocols.DataStoreMessageType.Update)
+            {
+                var value = message.Value;
+                var variable = message.Variable.ToLower();
+                if(_variables.ContainsKey(variable))
+                {
+                    Console.WriteLine($"Updating the value for {variable} to {value}");
+
+                    var tuple = _variables[variable];
+                    tuple.Variable.Value = value;
+                    _variables[variable] = tuple;
+                    // TODO: Here it would be nice to do -> [something].OnNext(tuple.Variable)
+                }
+            }
+        }
+
+        public IObservable<ObservableVariable> GetOrAdd(string variable)
         {
             variable = variable.ToLower();
 
@@ -30,7 +55,7 @@ namespace EcWamp.Subscriptions
                     var tuple = _variables[variable];
                     tuple.RefCounter++;
                     _variables[variable] = tuple;
-                    return tuple.Variable;
+                    return tuple.Variable.AsObservable();
                 }
                 else
                 {
@@ -40,19 +65,21 @@ namespace EcWamp.Subscriptions
                     _variables.Add(variable, tuple);
 
                     // TODO: Add it to the DataStore
-                    // dataStore.Read(variable);
+                    _dataStore.Read(variable);
 
-                    return tuple.Variable;
+                    return tuple.Variable.AsObservable();
                 }
             }
         }
 
-        public void Add(SubscriptionStream stream)
+        public List<IObservable<ObservableVariable>> GetOrAdd(SubscriptionStream stream)
         {
+            var observables = new List<IObservable<ObservableVariable>>();
             foreach (var variable in stream.BindableVariables)
             {
-                Add(variable.BindingAddress);
+                observables.Add(GetOrAdd(variable.BindingAddress));
             }
+            return observables;
         }
 
         public void Remove(SubscriptionStream userViewList)
