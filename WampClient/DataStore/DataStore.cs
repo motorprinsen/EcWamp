@@ -14,8 +14,6 @@ using WampSharp.V2.Realm;
 
 namespace EXOScadaAPI.DataStore
 {
-    public delegate void DataMessageDelegate(DataStoreMessage message);
-
     public class DataStore : IDataStore
     {
         private Cache<IOperationsService> _repositoryCache;

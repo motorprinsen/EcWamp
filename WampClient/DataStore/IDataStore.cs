@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace EXOScadaAPI.DataStore
 {
+    public delegate void DataMessageDelegate(DataStoreMessage message);
+
     public interface IDataStore
     {
         void Open();
@@ -15,5 +17,7 @@ namespace EXOScadaAPI.DataStore
         Dictionary<string, DataStoreMessage> Read(List<string> variables);
 
         Task<DataStoreMessage> Read(string variable);
+
+        event DataMessageDelegate DataChanged;
     }
 }
